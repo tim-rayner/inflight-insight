@@ -4,8 +4,25 @@ import { useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import type { TrackPoint } from "@/app/actions/flightTrack";
-import { destinationPoint, initialBearingDegrees, lerp, lerpLongitude, type LatLon } from "@/lib/flightTracking/geo";
+import { initialBearingDegrees, lerp, lerpLongitude, type LatLon } from "@/lib/flightTracking/geo";
 import { estimateCurrentSpeedMetersPerSecond, extrapolatePosition } from "@/lib/flightTracking/planeAnimation";
+import {
+  headingReferencePoint,
+  originGeoJSON,
+  routeLineFeature,
+  type PlanePosition,
+} from "@/lib/flightTracking/routeRendering";
+import { applyMarkerRotation, createPlaneMarkerElement } from "./planeMarker";
+import {
+  CORRECTION_DURATION_MS,
+  ENDPOINTS_LAYER_ID,
+  ENDPOINTS_SOURCE_ID,
+  ORIGIN_COLOR,
+  ROUTE_LINE_COLOR,
+  ROUTE_LINE_LAYER_ID,
+  ROUTE_SOURCE_ID,
+  TAIL_MODE_ZOOM,
+} from "./mapStyle";
 
 interface GlobeMapProps {
   accessToken: string;
@@ -15,67 +32,6 @@ interface GlobeMapProps {
   // mode yields to the user rather than fighting their input, so the parent
   // should just flip its checkbox off.
   onTailModeInterrupted: () => void;
-}
-
-const TAIL_MODE_ZOOM = 8;
-
-// How long a freshly-polled checkpoint is blended in from wherever the
-// dead-reckoned marker currently sits, rather than snapping straight there —
-// short enough to feel like a correction, not a new leg of flight.
-const CORRECTION_DURATION_MS = 1200;
-
-// A short fixed distance used only to build a second point near the plane's
-// current position for computing its on-screen rotation — see
-// `headingReferencePoint` below.
-const ROTATION_LOOKBACK_METERS = 200;
-
-const ROUTE_SOURCE_ID = "flight-route";
-const ROUTE_LINE_LAYER_ID = "flight-route-line";
-const ENDPOINTS_SOURCE_ID = "flight-route-endpoints";
-const ENDPOINTS_LAYER_ID = "flight-route-endpoints-circles";
-
-// Okabe-Ito colorblind-safe palette, chosen for contrast against the dark
-// "night" basemap preset.
-const ROUTE_LINE_COLOR = "#F0E442"; // yellow
-const ORIGIN_COLOR = "#E69F00"; // orange
-const PLANE_ICON_COLOR = "#D55E00"; // vermillion
-
-const PLANE_ICON_SVG = `
-<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 64 64">
-  <path d="M32 2 L38 22 L60 34 L60 40 L38 34 L38 46 L48 54 L48 59 L32 54 L16 59 L16 54 L26 46 L26 34 L4 40 L4 34 L26 22 Z"
-        fill="${PLANE_ICON_COLOR}" stroke="#1e293b" stroke-width="2" stroke-linejoin="round" />
-</svg>`;
-
-// A DOM-based Marker (rather than a symbol layer) so its position and
-// rotation update synchronously with our animation loop, in lockstep with
-// the route line — a symbol layer instead goes through Mapbox's async
-// tile/placement pipeline and can visibly lag the line at high zoom.
-function createPlaneMarkerElement(): HTMLDivElement {
-  const element = document.createElement("div");
-  element.style.width = "32px";
-  element.style.height = "32px";
-  element.innerHTML = PLANE_ICON_SVG;
-  return element;
-}
-
-function originGeoJSON(track: TrackPoint[]): GeoJSON.FeatureCollection<GeoJSON.Point> {
-  const origin = track[0];
-
-  return {
-    type: "FeatureCollection",
-    features: [
-      {
-        type: "Feature",
-        properties: { role: "origin" },
-        geometry: { type: "Point", coordinates: [origin.lon, origin.lat] },
-      },
-    ],
-  };
-}
-
-interface PlanePosition {
-  lon: number;
-  lat: number;
 }
 
 // The heading/speed model dead reckoning extrapolates from between polls —
@@ -96,48 +52,6 @@ interface Correction {
   to: PlanePosition;
   startTime: number;
   durationMs: number;
-}
-
-// Points the marker along the on-screen direction from `from` to `to`,
-// rather than a raw compass bearing. Under the globe projection, meridians
-// converge toward the poles the way they would on a real globe, so a
-// marker rotated by compass bearing alone visibly cants away from the
-// route line the further it is from the equator; projecting both segment
-// endpoints to screen pixels and measuring the angle between them matches
-// whatever Mapbox actually drew for the line, in any projection.
-function applyMarkerRotation(map: mapboxgl.Map, marker: mapboxgl.Marker, from: LatLon, to: LatLon): void {
-  const p1 = map.project([from.lon, from.lat]);
-  const p2 = map.project([to.lon, to.lat]);
-  const dx = p2.x - p1.x;
-  const dy = p2.y - p1.y;
-  if (dx === 0 && dy === 0) return;
-
-  const screenBearing = (Math.atan2(dx, -dy) * 180) / Math.PI;
-  marker.setRotation((screenBearing + 360) % 360);
-}
-
-// A point a short, fixed distance behind the plane's current position along
-// its current heading — paired with the position itself, this gives
-// applyMarkerRotation two points close together regardless of how far the
-// plane has actually dead-reckoned from its last confirmed checkpoint, so
-// its on-screen bearing stays accurate (a long-range "from" far behind can
-// disagree with the local screen direction once the camera is zoomed in).
-function headingReferencePoint(position: LatLon, bearingDegrees: number): LatLon {
-  return destinationPoint(position, (bearingDegrees + 180) % 360, ROTATION_LOOKBACK_METERS);
-}
-
-// The route line's tip always matches wherever the plane marker currently
-// is — including mid-glide — so the two never visibly disagree about the
-// plane's position.
-function routeLineFeature(settledPoints: TrackPoint[], tip: PlanePosition): GeoJSON.Feature<GeoJSON.LineString> {
-  const coordinates: [number, number][] = settledPoints.map((point) => [point.lon, point.lat]);
-  coordinates.push([tip.lon, tip.lat]);
-
-  return {
-    type: "Feature",
-    properties: {},
-    geometry: { type: "LineString", coordinates },
-  };
 }
 
 export default function GlobeMap({ accessToken, track, tailMode, onTailModeInterrupted }: GlobeMapProps) {
