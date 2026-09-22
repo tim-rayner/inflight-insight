@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { MapContext } from "../lib/mapContext";
@@ -53,4 +53,4 @@ function MapView({ accessToken, children }: MapViewProps) {
   );
 }
 
-export default memo(MapView);
+export default MapView;

@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState, useSyncExternalStore, type FormEvent } from "react";
+import dynamic from "next/dynamic";
 import { useQuery } from "@tanstack/react-query";
-import MapView from "@/features/map/component/MapView";
-import FlightRouteLayer from "@/features/flight-route/component/FlightRouteLayer";
 import FlightTelemetryPanel from "@/features/flight-telemetry/component/FlightTelemetryPanel";
 import { FlightWrapper, PlaneLocationLog } from "@/features/flight-telemetry/component/FlightWrapper";
 import {
@@ -12,18 +11,31 @@ import {
   setCachedFlightTrack,
   setTrackedFlightNumber,
 } from "@/features/flight-tracker/lib/storage";
+import { persistTrackedFlightNumber } from "@/features/flight-tracker/lib/persistTrackedFlightNumber";
 import { resolveFlightRoute, type ResolveFlightRouteResult } from "@/features/flight-tracker/lib/resolveFlightRoute";
+
+const MapView = dynamic(() => import("@/features/map/component/MapView"), { ssr: false });
+const FlightRouteLayer = dynamic(() => import("@/features/flight-route/component/FlightRouteLayer"), { ssr: false });
 
 interface FlightTrackerProps {
   accessToken: string;
+  initialFlightNumber?: string;
 }
 
 // Keep the in-view flight status current without hammering the FR24 API.
 const POLL_INTERVAL_MS = 61_000;
 
-function initialTrackedFlightNumber(): string {
-  if (typeof window === "undefined") return "";
+function subscribe(onStoreChange: () => void) {
+  window.addEventListener("storage", onStoreChange);
+  return () => window.removeEventListener("storage", onStoreChange);
+}
+
+function getClientSnapshot() {
   return getTrackedFlightNumber() ?? "";
+}
+
+function getServerSnapshot() {
+  return "";
 }
 
 // Seeds TanStack Query with the last-known track for this flight number so a page
@@ -34,9 +46,12 @@ function initialFallbackResult(flightNumber: string): ResolveFlightRouteResult |
   return cached ? { status: "found", track: cached.track, record: cached.record } : undefined;
 }
 
-export default function FlightTracker({ accessToken }: FlightTrackerProps) {
-  const [flightNumberInput, setFlightNumberInput] = useState<string>(initialTrackedFlightNumber);
-  const [submittedFlightNumber, setSubmittedFlightNumber] = useState<string>(initialTrackedFlightNumber);
+export default function FlightTracker({ accessToken, initialFlightNumber = "" }: FlightTrackerProps) {
+  const persistedFlightNumber = useSyncExternalStore(subscribe, getClientSnapshot, getServerSnapshot);
+  const [draftInput, setDraftInput] = useState<string | null>(null);
+  const [submittedOverride, setSubmittedOverride] = useState<string | null>(null);
+  const submittedFlightNumber = submittedOverride ?? (persistedFlightNumber || initialFlightNumber);
+  const flightNumberInput = draftInput ?? (persistedFlightNumber || initialFlightNumber);
   const [tailMode, setTailMode] = useState(false);
 
   const { data: result, isLoading } = useQuery({
@@ -44,6 +59,8 @@ export default function FlightTracker({ accessToken }: FlightTrackerProps) {
     queryFn: () => resolveFlightRoute(submittedFlightNumber),
     enabled: !!submittedFlightNumber,
     refetchInterval: POLL_INTERVAL_MS,
+    staleTime: POLL_INTERVAL_MS,
+    initialDataUpdatedAt: 0,
     initialData: () => initialFallbackResult(submittedFlightNumber),
   });
 
@@ -70,7 +87,9 @@ export default function FlightTracker({ accessToken }: FlightTrackerProps) {
     if (!trimmed) return;
 
     setTrackedFlightNumber(trimmed);
-    setSubmittedFlightNumber(trimmed);
+    void persistTrackedFlightNumber(trimmed);
+    setSubmittedOverride(trimmed);
+    setDraftInput(trimmed);
   }
 
   return (
@@ -96,7 +115,7 @@ export default function FlightTracker({ accessToken }: FlightTrackerProps) {
               name="flight-number"
               type="text"
               value={flightNumberInput}
-              onChange={(event) => setFlightNumberInput(event.target.value.toUpperCase())}
+              onChange={(event) => setDraftInput(event.target.value.toUpperCase())}
               placeholder="BA285"
               className="w-32 rounded border border-white/30 bg-white/10 px-2 py-1 uppercase outline-none focus:border-white"
             />

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, type ReactNode } from "react";
+import { createContext, useContext, useMemo, type ReactNode } from "react";
 import type { TrackPoint } from "@/features/flight-track/lib/getFlightTrack";
 import type { FlightSummaryRecord } from "@/shared/fr24/callsign";
 import {
@@ -39,10 +39,9 @@ export function PlaneLocationLog() {
   const lat = flight?.location.lat;
   const lng = flight?.location.lng;
 
-  useEffect(() => {
-    if (lat == null || lng == null) return;
+  if (lat != null && lng != null) {
     console.log("plane is", { lat, lng });
-  }, [lat, lng]);
+  }
 
   return null;
 }

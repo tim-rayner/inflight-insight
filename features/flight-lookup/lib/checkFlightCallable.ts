@@ -1,4 +1,4 @@
-"use server";
+import "server-only";
 
 import { getFr24Headers } from "@/shared/fr24/auth";
 import { extractOperationalCallsign } from "@/shared/fr24/callsign";
