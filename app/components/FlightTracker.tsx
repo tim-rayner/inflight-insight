@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
-import useSWR from "swr";
+import { useEffect, useState, type FormEvent } from "react";
+import { useQuery } from "@tanstack/react-query";
 import GlobeMap from "@/app/components/GlobeMap";
 import FlightTelemetryPanel from "@/app/components/FlightTelemetryPanel";
 import {
@@ -24,7 +24,7 @@ function initialTrackedFlightNumber(): string {
   return getTrackedFlightNumber() ?? "";
 }
 
-// Seeds SWR with the last-known track for this flight number so a page
+// Seeds TanStack Query with the last-known track for this flight number so a page
 // refresh renders the cached route immediately, ahead of any network call.
 function initialFallbackResult(flightNumber: string): ResolveFlightRouteResult | undefined {
   if (typeof window === "undefined" || !flightNumber) return undefined;
@@ -37,19 +37,19 @@ export default function FlightTracker({ accessToken }: FlightTrackerProps) {
   const [submittedFlightNumber, setSubmittedFlightNumber] = useState<string>(initialTrackedFlightNumber);
   const [tailMode, setTailMode] = useState(false);
 
-  const { data: result, isLoading } = useSWR(
-    submittedFlightNumber || null,
-    resolveFlightRoute,
-    {
-      fallbackData: initialFallbackResult(submittedFlightNumber),
-      refreshInterval: POLL_INTERVAL_MS,
-      onSuccess: (data, flightNumber) => {
-        if (data.status === "found") {
-          setCachedFlightTrack(flightNumber, data.track, data.record);
-        }
-      },
-    },
-  );
+  const { data: result, isLoading } = useQuery({
+    queryKey: ["flight-route", submittedFlightNumber],
+    queryFn: () => resolveFlightRoute(submittedFlightNumber),
+    enabled: !!submittedFlightNumber,
+    refetchInterval: POLL_INTERVAL_MS,
+    initialData: () => initialFallbackResult(submittedFlightNumber),
+  });
+
+  useEffect(() => {
+    if (submittedFlightNumber && result?.status === "found") {
+      setCachedFlightTrack(submittedFlightNumber, result.track, result.record);
+    }
+  }, [submittedFlightNumber, result]);
 
   const track = result?.status === "found" ? result.track : null;
   const record = result?.status === "found" ? result.record : null;
