@@ -15,13 +15,15 @@ interface GlobeMapProps {
   accessToken: string;
   track: TrackPoint[] | null;
   tailMode: boolean;
-  // Called when the user manually pans/zooms while tail mode is on — tail
-  // mode yields to the user rather than fighting their input, so the parent
-  // should just flip its checkbox off.
   onTailModeInterrupted: () => void;
 }
 
-export default function GlobeMap({ accessToken, track, tailMode, onTailModeInterrupted }: GlobeMapProps) {
+export default function GlobeMap({
+  accessToken,
+  track,
+  tailMode,
+  onTailModeInterrupted,
+}: GlobeMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const userInteractedRef = useRef(false);
@@ -102,7 +104,8 @@ export default function GlobeMap({ accessToken, track, tailMode, onTailModeInter
       if (event.originalEvent) handleUserInteraction();
     });
     map.on("zoomstart", (event) => {
-      if ("originalEvent" in event && event.originalEvent) handleUserInteraction();
+      if ("originalEvent" in event && event.originalEvent)
+        handleUserInteraction();
     });
 
     // Re-projecting on every camera move (pan, zoom, rotate, pitch — user- or
@@ -112,7 +115,8 @@ export default function GlobeMap({ accessToken, track, tailMode, onTailModeInter
     map.on("move", () => {
       const marker = planeMarkerRef.current;
       const segment = headingSegmentRef.current;
-      if (marker && segment) applyMarkerRotation(map, marker, segment.from, segment.to);
+      if (marker && segment)
+        applyMarkerRotation(map, marker, segment.from, segment.to);
     });
 
     mapRef.current = map;

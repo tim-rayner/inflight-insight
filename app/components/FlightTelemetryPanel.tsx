@@ -2,18 +2,18 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import {
-  Airplane,
-  AirplaneTakeoff,
-  ArrowsVertical,
-  Broadcast,
-  Compass,
-  Gauge,
-  MapPin,
-  Path,
-  Minus,
-  Timer,
-  TrendDown,
-  TrendUp,
+  AirplaneIcon,
+  AirplaneTakeoffIcon,
+  ArrowsVerticalIcon,
+  BroadcastIcon,
+  CompassIcon,
+  GaugeIcon,
+  MapPinIcon,
+  PathIcon,
+  MinusIcon,
+  TimerIcon,
+  TrendDownIcon,
+  TrendUpIcon,
 } from "@phosphor-icons/react";
 import type { TrackPoint } from "@/app/actions/flightTrack";
 import type { FlightSummaryRecord } from "@/lib/fr24/callsign";
@@ -69,7 +69,7 @@ export default function FlightTelemetryPanel({ flightNumber, track, record }: Fl
   const avgSpeedKt = elapsedHours > 0.01 ? distanceNm / elapsedHours : current.gspeed;
 
   const vertical = verticalRateStatus(current.vspeed);
-  const VerticalIcon = vertical === "climbing" ? TrendUp : vertical === "descending" ? TrendDown : Minus;
+  const VerticalIcon = vertical === "climbing" ? TrendUpIcon : vertical === "descending" ? TrendDownIcon : MinusIcon;
   const verticalLabel =
     vertical === "level" ? "Level" : `${vertical === "climbing" ? "+" : ""}${NUMBER_FORMAT.format(current.vspeed)} ft/min`;
 
@@ -84,7 +84,7 @@ export default function FlightTelemetryPanel({ flightNumber, track, record }: Fl
     <div className="absolute bottom-4 left-4 z-10 w-72 max-w-[calc(100vw-2rem)] rounded-lg bg-black/70 p-3 text-sm text-white shadow-lg backdrop-blur">
       <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-2">
         <div className="flex min-w-0 items-center gap-1.5 font-medium">
-          <Airplane size={14} weight="fill" className="shrink-0 text-sky-400" />
+          <AirplaneIcon size={14} weight="fill" className="shrink-0 text-sky-400" />
           <span className="truncate">
             {flightNumber}
             {showCallsign ? ` · ${callsign}` : ""}
@@ -95,30 +95,30 @@ export default function FlightTelemetryPanel({ flightNumber, track, record }: Fl
 
       <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2 max-[420px]:grid-cols-1">
         <TelemetryField
-          icon={<Gauge size={13} />}
+          icon={<GaugeIcon size={13} />}
           label="Ground speed"
           value={`${NUMBER_FORMAT.format(current.gspeed)} kt`}
         />
         <TelemetryField
-          icon={<ArrowsVertical size={13} />}
+          icon={<ArrowsVerticalIcon size={13} />}
           label="Altitude"
           value={`${NUMBER_FORMAT.format(current.alt)} ft`}
         />
         <TelemetryField icon={<VerticalIcon size={13} />} label="Vertical rate" value={verticalLabel} />
         <TelemetryField
-          icon={<Compass size={13} />}
+          icon={<CompassIcon size={13} />}
           label="Heading"
           value={`${Math.round(current.track)}° ${compassDirection(current.track)}`}
         />
-        <TelemetryField icon={<Timer size={13} />} label="Airborne" value={formatDurationShort(elapsedMs)} />
+        <TelemetryField icon={<TimerIcon size={13} />} label="Airborne" value={formatDurationShort(elapsedMs)} />
         <TelemetryField
-          icon={<Path size={13} weight="bold" />}
+          icon={<PathIcon size={13} weight="bold" />}
           label="Distance flown"
           value={`${NUMBER_FORMAT.format(distanceNm)} nm`}
         />
-        <TelemetryField icon={<AirplaneTakeoff size={13} />} label="Departed" value={TIME_FORMAT.format(departedDate)} />
+        <TelemetryField icon={<AirplaneTakeoffIcon size={13} />} label="Departed" value={TIME_FORMAT.format(departedDate)} />
         <TelemetryField
-          icon={<Gauge size={13} />}
+          icon={<GaugeIcon size={13} />}
           label="Average speed"
           value={`${NUMBER_FORMAT.format(avgSpeedKt)} kt`}
         />
@@ -126,12 +126,12 @@ export default function FlightTelemetryPanel({ flightNumber, track, record }: Fl
 
       <div className="mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t border-white/10 pt-1.5 font-mono text-[11px] text-white/50">
         <span className="flex items-center gap-1">
-          <MapPin size={11} />
+          <MapPinIcon size={11} />
           {`${current.lat.toFixed(2)}°, ${current.lon.toFixed(2)}°`}
         </span>
         {current.squawk && <span>{`squawk ${current.squawk}`}</span>}
         <span className="flex items-center gap-1">
-          <Broadcast size={11} />
+          <BroadcastIcon size={11} />
           {`${current.source || "unknown"} · ${formatSecondsAgo(lastUpdateMs)}`}
         </span>
       </div>
