@@ -6,6 +6,12 @@ function toRadians(degrees: number): number {
   return (degrees * Math.PI) / 180;
 }
 
+/**
+ * calculates the distance between two points on the Earth's surface using the Haversine formula
+ * @param a - first point
+ * @param b - second point
+ * @returns number - distance in nautical miles
+ */
 export function haversineDistanceNm(
   a: { lat: number; lon: number },
   b: { lat: number; lon: number },
@@ -17,7 +23,8 @@ export function haversineDistanceNm(
 
   const sinDLat = Math.sin(dLat / 2);
   const sinDLon = Math.sin(dLon / 2);
-  const h = sinDLat * sinDLat + Math.cos(lat1) * Math.cos(lat2) * sinDLon * sinDLon;
+  const h =
+    sinDLat * sinDLat + Math.cos(lat1) * Math.cos(lat2) * sinDLon * sinDLon;
 
   return 2 * EARTH_RADIUS_NM * Math.asin(Math.min(1, Math.sqrt(h)));
 }

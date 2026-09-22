@@ -19,6 +19,11 @@ export interface OperationalCallsign {
   record: FlightSummaryRecord | null;
 }
 
+/**
+ * extracts the most recent operational callsign from a list of flight summary records
+ * @param records - list of flight summary records
+ * @returns OperationalCallsign - operational callsign and record
+ */
 export function extractOperationalCallsign(
   records: FlightSummaryRecord[],
 ): OperationalCallsign {

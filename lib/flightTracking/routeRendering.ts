@@ -1,3 +1,4 @@
+import type { Feature, FeatureCollection, LineString, Point } from "geojson";
 import type { TrackPoint } from "@/app/actions/flightTrack";
 import { destinationPoint, type LatLon } from "@/lib/flightTracking/geo";
 
@@ -11,7 +12,7 @@ export interface PlanePosition {
   lat: number;
 }
 
-export function originGeoJSON(track: TrackPoint[]): GeoJSON.FeatureCollection<GeoJSON.Point> {
+export function originGeoJSON(track: TrackPoint[]): FeatureCollection<Point> {
   const origin = track[0];
 
   return {
@@ -32,8 +33,11 @@ export function originGeoJSON(track: TrackPoint[]): GeoJSON.FeatureCollection<Ge
 export function routeLineFeature(
   settledPoints: TrackPoint[],
   tip: PlanePosition,
-): GeoJSON.Feature<GeoJSON.LineString> {
-  const coordinates: [number, number][] = settledPoints.map((point) => [point.lon, point.lat]);
+): Feature<LineString> {
+  const coordinates: [number, number][] = settledPoints.map((point) => [
+    point.lon,
+    point.lat,
+  ]);
   coordinates.push([tip.lon, tip.lat]);
 
   return {
@@ -43,12 +47,19 @@ export function routeLineFeature(
   };
 }
 
-// A point a short, fixed distance behind the plane's current position along
+// A point is a short, fixed distance behind the plane's current position along
 // its current heading — paired with the position itself, this gives
 // applyMarkerRotation two points close together regardless of how far the
 // plane has actually dead-reckoned from its last confirmed checkpoint, so
 // its on-screen bearing stays accurate (a long-range "from" far behind can
 // disagree with the local screen direction once the camera is zoomed in).
-export function headingReferencePoint(position: LatLon, bearingDegrees: number): LatLon {
-  return destinationPoint(position, (bearingDegrees + 180) % 360, ROTATION_LOOKBACK_METERS);
+export function headingReferencePoint(
+  position: LatLon,
+  bearingDegrees: number,
+): LatLon {
+  return destinationPoint(
+    position,
+    (bearingDegrees + 180) % 360,
+    ROTATION_LOOKBACK_METERS,
+  );
 }
