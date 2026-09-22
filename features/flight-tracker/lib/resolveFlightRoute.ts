@@ -1,6 +1,6 @@
-import type { TrackPoint } from "@/app/actions/flightTrack";
-import type { FlightCallabilityResult } from "@/app/actions/flight";
-import type { FlightSummaryRecord } from "@/lib/fr24/callsign";
+import type { TrackPoint } from "@/features/flight-track/lib/getFlightTrack";
+import type { FlightCallabilityResult } from "@/features/flight-lookup/lib/checkFlightCallable";
+import type { FlightSummaryRecord } from "@/shared/fr24/callsign";
 
 export type ResolveFlightRouteResult =
   | { status: "found"; track: TrackPoint[]; record: FlightSummaryRecord | null }

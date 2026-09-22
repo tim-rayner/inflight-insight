@@ -15,15 +15,15 @@ import {
   TrendDownIcon,
   TrendUpIcon,
 } from "@phosphor-icons/react";
-import type { TrackPoint } from "@/app/actions/flightTrack";
-import type { FlightSummaryRecord } from "@/lib/fr24/callsign";
+import type { TrackPoint } from "@/features/flight-track/lib/getFlightTrack";
+import type { FlightSummaryRecord } from "@/shared/fr24/callsign";
 import {
   compassDirection,
   formatDurationShort,
   formatSecondsAgo,
   trackDistanceNm,
   verticalRateStatus,
-} from "@/lib/flightTracking/telemetry";
+} from "@/features/flight-telemetry/lib/telemetry";
 
 interface FlightTelemetryPanelProps {
   flightNumber: string;

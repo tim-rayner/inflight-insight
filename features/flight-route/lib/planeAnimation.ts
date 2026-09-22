@@ -1,9 +1,9 @@
-import type { TrackPoint } from "@/app/actions/flightTrack";
+import type { TrackPoint } from "@/features/flight-track/lib/getFlightTrack";
 import {
   destinationPoint,
   haversineDistanceMeters,
   type LatLon,
-} from "@/lib/flightTracking/geo";
+} from "@/features/flight-route/lib/geo";
 
 // Once a checkpoint is this stale, stop dead-reckoning it any further
 // forward — most likely the flight has landed, gone out of coverage, or

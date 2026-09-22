@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { TrackPoint } from "@/app/actions/flightTrack";
+import type { TrackPoint } from "@/features/flight-track/lib/getFlightTrack";
 
 function trackPoint(overrides: Partial<TrackPoint>): TrackPoint {
   return {

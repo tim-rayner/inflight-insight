@@ -1,10 +1,10 @@
 import type mapboxgl from "mapbox-gl";
-import { lerp, lerpLongitude } from "@/lib/flightTracking/geo";
-import { extrapolatePosition } from "@/lib/flightTracking/planeAnimation";
-import { headingReferencePoint, routeLineFeature, type PlanePosition } from "@/lib/flightTracking/routeRendering";
+import { lerp, lerpLongitude } from "@/features/flight-route/lib/geo";
+import { extrapolatePosition } from "@/features/flight-route/lib/planeAnimation";
+import { headingReferencePoint, routeLineFeature, type PlanePosition } from "@/features/flight-route/lib/routeRendering";
 import { applyMarkerRotation } from "./planeMarker";
 import { ROUTE_SOURCE_ID } from "./mapStyle";
-import type { GlobeMapRefs } from "./types";
+import type { FlightRouteLayerRefs } from "./types";
 
 // Runs for as long as a flight is tracked, driving the marker every frame:
 // either a brief correction blend right after a poll lands a new checkpoint,
@@ -12,7 +12,7 @@ import type { GlobeMapRefs } from "./types";
 // reckoning forward from the last checkpoint's own heading and speed. This is
 // what keeps the plane moving between polls instead of sitting frozen at the
 // last confirmed point until the next one lands.
-export function createPlaneAnimationLoop(map: mapboxgl.Map, refs: GlobeMapRefs) {
+export function createPlaneAnimationLoop(map: mapboxgl.Map, refs: FlightRouteLayerRefs) {
   const runStep = () => {
     const marker = refs.planeMarkerRef.current;
     const basis = refs.extrapolationBasisRef.current;

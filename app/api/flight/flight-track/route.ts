@@ -1,5 +1,5 @@
-import { getFlightTrack } from "@/app/actions/flightTrack";
-import { Fr24RequestError } from "@/lib/fr24/errors";
+import { getFlightTrack } from "@/features/flight-track/lib/getFlightTrack";
+import { Fr24RequestError } from "@/shared/fr24/errors";
 
 /**
  * POST /api/flight/flight-track

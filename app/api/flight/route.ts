@@ -1,5 +1,5 @@
-import { checkFlightCallable } from "@/app/actions/flight";
-import { Fr24RequestError } from "@/lib/fr24/errors";
+import { checkFlightCallable } from "@/features/flight-lookup/lib/checkFlightCallable";
+import { Fr24RequestError } from "@/shared/fr24/errors";
 
 /**
  * POST /api/flight

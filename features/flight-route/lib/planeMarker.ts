@@ -1,5 +1,5 @@
 import mapboxgl from "mapbox-gl";
-import type { LatLon } from "@/lib/flightTracking/geo";
+import type { LatLon } from "@/features/flight-route/lib/geo";
 import { PLANE_ICON_COLOR } from "./mapStyle";
 
 const PLANE_ICON_SVG = `

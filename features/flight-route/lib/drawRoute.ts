@@ -1,8 +1,8 @@
 import mapboxgl from "mapbox-gl";
-import type { TrackPoint } from "@/app/actions/flightTrack";
-import { initialBearingDegrees } from "@/lib/flightTracking/geo";
-import { estimateCurrentSpeedMetersPerSecond, extrapolatePosition } from "@/lib/flightTracking/planeAnimation";
-import { originGeoJSON, routeLineFeature, type PlanePosition } from "@/lib/flightTracking/routeRendering";
+import type { TrackPoint } from "@/features/flight-track/lib/getFlightTrack";
+import { initialBearingDegrees } from "@/features/flight-route/lib/geo";
+import { estimateCurrentSpeedMetersPerSecond, extrapolatePosition } from "@/features/flight-route/lib/planeAnimation";
+import { originGeoJSON, routeLineFeature, type PlanePosition } from "@/features/flight-route/lib/routeRendering";
 import { applyMarkerRotation, createPlaneMarkerElement } from "./planeMarker";
 import {
   CORRECTION_DURATION_MS,
@@ -14,13 +14,13 @@ import {
   ROUTE_SOURCE_ID,
   TAIL_MODE_ZOOM,
 } from "./mapStyle";
-import type { ExtrapolationBasis, GlobeMapRefs } from "./types";
+import type { ExtrapolationBasis, FlightRouteLayerRefs } from "./types";
 
 // Syncs the map's route line, endpoint markers, and plane marker to the
 // latest polled track and tail-mode setting. Called once on mount (once the
 // map's style has finished loading) and again on every subsequent track or
 // tailMode change.
-export function drawRoute(map: mapboxgl.Map, track: TrackPoint[] | null, tailMode: boolean, refs: GlobeMapRefs): void {
+export function drawRoute(map: mapboxgl.Map, track: TrackPoint[] | null, tailMode: boolean, refs: FlightRouteLayerRefs): void {
   if (!track || track.length === 0) {
     if (refs.planeAnimationFrameRef.current !== null) {
       cancelAnimationFrame(refs.planeAnimationFrameRef.current);

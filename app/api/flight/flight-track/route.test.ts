@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("../../../actions/flightTrack", () => ({
+vi.mock("@/features/flight-track/lib/getFlightTrack", () => ({
   getFlightTrack: vi.fn(),
 }));
 
-import { getFlightTrack } from "../../../actions/flightTrack";
-import { Fr24RequestError } from "../../../../lib/fr24/errors";
+import { getFlightTrack } from "@/features/flight-track/lib/getFlightTrack";
+import { Fr24RequestError } from "@/shared/fr24/errors";
 import { POST } from "./route";
 
 const getFlightTrackMock = vi.mocked(getFlightTrack);

@@ -1,4 +1,4 @@
-import type { TrackPoint } from "@/app/actions/flightTrack";
+import type { TrackPoint } from "@/features/flight-track/lib/getFlightTrack";
 
 const EARTH_RADIUS_NM = 3440.065;
 

@@ -54,7 +54,7 @@ describe("getFlightTrack", () => {
     });
     vi.stubGlobal("fetch", fetchMock);
 
-    const { getFlightTrack } = await import("./flightTrack");
+    const { getFlightTrack } = await import("./getFlightTrack");
     const result = await getFlightTrack("391fdd79");
 
     expect(result.fr24Id).toBe("391fdd79");
@@ -77,7 +77,7 @@ describe("getFlightTrack", () => {
     });
     vi.stubGlobal("fetch", fetchMock);
 
-    const { getFlightTrack } = await import("./flightTrack");
+    const { getFlightTrack } = await import("./getFlightTrack");
     const result = await getFlightTrack("391fdd79");
 
     expect(result.track).toEqual([]);
@@ -86,7 +86,7 @@ describe("getFlightTrack", () => {
   it("throws when fr24Id is empty", async () => {
     vi.stubGlobal("fetch", vi.fn());
 
-    const { getFlightTrack } = await import("./flightTrack");
+    const { getFlightTrack } = await import("./getFlightTrack");
 
     await expect(getFlightTrack("")).rejects.toThrow(/fr24Id is required/);
   });
@@ -95,7 +95,7 @@ describe("getFlightTrack", () => {
     delete process.env.FR24_API_TOKEN;
     vi.stubGlobal("fetch", vi.fn());
 
-    const { getFlightTrack } = await import("./flightTrack");
+    const { getFlightTrack } = await import("./getFlightTrack");
 
     await expect(getFlightTrack("391fdd79")).rejects.toThrow(
       /FR24 API token is not configured/,
@@ -111,8 +111,8 @@ describe("getFlightTrack", () => {
     });
     vi.stubGlobal("fetch", fetchMock);
 
-    const { getFlightTrack } = await import("./flightTrack");
-    const { Fr24RequestError } = await import("../../lib/fr24/errors");
+    const { getFlightTrack } = await import("./getFlightTrack");
+    const { Fr24RequestError } = await import("../../../shared/fr24/errors");
 
     await expect(getFlightTrack("does-not-exist")).rejects.toThrow(
       Fr24RequestError,

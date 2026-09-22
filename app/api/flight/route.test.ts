@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("../../actions/flight", () => ({
+vi.mock("@/features/flight-lookup/lib/checkFlightCallable", () => ({
   checkFlightCallable: vi.fn(),
 }));
 
-import { checkFlightCallable } from "../../actions/flight";
-import { Fr24RequestError } from "../../../lib/fr24/errors";
+import { checkFlightCallable } from "@/features/flight-lookup/lib/checkFlightCallable";
+import { Fr24RequestError } from "@/shared/fr24/errors";
 import { POST } from "./route";
 
 const checkFlightCallableMock = vi.mocked(checkFlightCallable);

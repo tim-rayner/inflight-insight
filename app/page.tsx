@@ -1,4 +1,4 @@
-import FlightTrackerLoader from "@/app/components/FlightTrackerLoader";
+import FlightTrackerLoader from "@/features/flight-tracker/component/FlightTrackerLoader";
 
 export default function Home() {
   const accessToken = process.env.MAPBOX_TOKEN;

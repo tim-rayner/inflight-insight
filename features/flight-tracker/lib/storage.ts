@@ -1,5 +1,5 @@
-import type { TrackPoint } from "@/app/actions/flightTrack";
-import type { FlightSummaryRecord } from "@/lib/fr24/callsign";
+import type { TrackPoint } from "@/features/flight-track/lib/getFlightTrack";
+import type { FlightSummaryRecord } from "@/shared/fr24/callsign";
 
 const TRACKED_FLIGHT_NUMBER_KEY = "trackedFlightNumber";
 const CACHED_FLIGHT_TRACK_KEY = "cachedFlightTrack";

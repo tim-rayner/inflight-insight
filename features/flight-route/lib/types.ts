@@ -1,8 +1,8 @@
 import type { RefObject } from "react";
 import type mapboxgl from "mapbox-gl";
-import type { TrackPoint } from "@/app/actions/flightTrack";
-import type { LatLon } from "@/lib/flightTracking/geo";
-import type { PlanePosition } from "@/lib/flightTracking/routeRendering";
+import type { TrackPoint } from "@/features/flight-track/lib/getFlightTrack";
+import type { LatLon } from "@/features/flight-route/lib/geo";
+import type { PlanePosition } from "@/features/flight-route/lib/routeRendering";
 
 // The heading/speed model dead reckoning extrapolates from between polls —
 // re-derived from the last two checkpoints on every poll that lands a new
@@ -24,12 +24,14 @@ export interface Correction {
   durationMs: number;
 }
 
-// The mutable state shared across the map-lifecycle effect, the plane
-// animation loop, and the route-drawing sync — bundled together since
-// mapboxgl's imperative API means all three read and write the same
-// underlying refs rather than communicating through React state or props.
-export interface GlobeMapRefs {
-  mapRef: RefObject<mapboxgl.Map | null>;
+// The mutable state shared across the layer's user-interaction/animation
+// effect, the plane animation loop, and the route-drawing sync — bundled
+// together since mapboxgl's imperative API means all three read and write
+// the same underlying refs rather than communicating through React state or
+// props. The map instance itself isn't a field here — it's passed to each
+// helper directly (via `useMap()` in the component), since these refs
+// outlive any single map instance.
+export interface FlightRouteLayerRefs {
   // Once the user manually pans/zooms, stop overriding their view on redraws.
   userInteractedRef: RefObject<boolean>;
   // Tracks whether tail mode was already active on the last draw, so we only

@@ -1,7 +1,7 @@
 "use server";
 
-import { getFr24Headers } from "@/lib/fr24/auth";
-import { Fr24RequestError } from "@/lib/fr24/errors";
+import { getFr24Headers } from "@/shared/fr24/auth";
+import { Fr24RequestError } from "@/shared/fr24/errors";
 
 const FLIGHT_TRACKS_URL = "https://fr24api.flightradar24.com/api/flight-tracks";
 

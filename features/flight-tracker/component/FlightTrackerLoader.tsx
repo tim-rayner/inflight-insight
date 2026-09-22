@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 
-const FlightTracker = dynamic(() => import("@/app/components/FlightTracker"), {
+const FlightTracker = dynamic(() => import("@/features/flight-tracker/component/FlightTracker"), {
   ssr: false,
 });
 

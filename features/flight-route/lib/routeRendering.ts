@@ -1,6 +1,6 @@
 import type { Feature, FeatureCollection, LineString, Point } from "geojson";
-import type { TrackPoint } from "@/app/actions/flightTrack";
-import { destinationPoint, type LatLon } from "@/lib/flightTracking/geo";
+import type { TrackPoint } from "@/features/flight-track/lib/getFlightTrack";
+import { destinationPoint, type LatLon } from "@/features/flight-route/lib/geo";
 
 // A short fixed distance used only to build a second point near the plane's
 // current position for computing its on-screen rotation — see

@@ -1,9 +1,9 @@
 "use server";
 
-import { getFr24Headers } from "@/lib/fr24/auth";
-import { extractOperationalCallsign } from "@/lib/fr24/callsign";
-import { Fr24RequestError } from "@/lib/fr24/errors";
-import type { FlightSummaryRecord } from "@/lib/fr24/callsign";
+import { getFr24Headers } from "@/shared/fr24/auth";
+import { extractOperationalCallsign } from "@/shared/fr24/callsign";
+import { Fr24RequestError } from "@/shared/fr24/errors";
+import type { FlightSummaryRecord } from "@/shared/fr24/callsign";
 
 const FLIGHT_SUMMARY_URL = "https://fr24api.flightradar24.com/api/flight-summary/light";
 const LOOKBACK_HOURS = 24;

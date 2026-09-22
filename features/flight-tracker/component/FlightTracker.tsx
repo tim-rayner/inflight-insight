@@ -2,15 +2,16 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
-import GlobeMap from "@/app/components/GlobeMap";
-import FlightTelemetryPanel from "@/app/components/FlightTelemetryPanel";
+import MapView from "@/features/map/component/MapView";
+import FlightRouteLayer from "@/features/flight-route/component/FlightRouteLayer";
+import FlightTelemetryPanel from "@/features/flight-telemetry/component/FlightTelemetryPanel";
 import {
   getCachedFlightTrack,
   getTrackedFlightNumber,
   setCachedFlightTrack,
   setTrackedFlightNumber,
-} from "@/lib/flightTracking/storage";
-import { resolveFlightRoute, type ResolveFlightRouteResult } from "@/lib/flightTracking/resolveFlightRoute";
+} from "@/features/flight-tracker/lib/storage";
+import { resolveFlightRoute, type ResolveFlightRouteResult } from "@/features/flight-tracker/lib/resolveFlightRoute";
 
 interface FlightTrackerProps {
   accessToken: string;
@@ -73,12 +74,13 @@ export default function FlightTracker({ accessToken }: FlightTrackerProps) {
 
   return (
     <div className="relative h-full w-full">
-      <GlobeMap
-        accessToken={accessToken}
-        track={track}
-        tailMode={tailMode}
-        onTailModeInterrupted={() => setTailMode(false)}
-      />
+      <MapView accessToken={accessToken}>
+        <FlightRouteLayer
+          track={track}
+          tailMode={tailMode}
+          onTailModeInterrupted={() => setTailMode(false)}
+        />
+      </MapView>
       <form
         onSubmit={handleSubmit}
         className="absolute left-4 top-4 z-10 flex flex-col gap-2 rounded-lg bg-black/70 p-3 text-sm text-white shadow-lg backdrop-blur"

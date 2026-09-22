@@ -1,31 +1,30 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import mapboxgl from "mapbox-gl";
-import "mapbox-gl/dist/mapbox-gl.css";
-import type { TrackPoint } from "@/app/actions/flightTrack";
-import type { LatLon } from "@/lib/flightTracking/geo";
-import type { PlanePosition } from "@/lib/flightTracking/routeRendering";
-import { applyMarkerRotation } from "./planeMarker";
-import { createPlaneAnimationLoop } from "./planeAnimationLoop";
-import { drawRoute } from "./drawRoute";
-import type { Correction, ExtrapolationBasis, GlobeMapRefs } from "./types";
+import type mapboxgl from "mapbox-gl";
+import { useMap } from "@/features/map/lib/mapContext";
+import type { TrackPoint } from "@/features/flight-track/lib/getFlightTrack";
+import type { LatLon } from "@/features/flight-route/lib/geo";
+import type { PlanePosition } from "@/features/flight-route/lib/routeRendering";
+import { applyMarkerRotation } from "../lib/planeMarker";
+import { createPlaneAnimationLoop } from "../lib/planeAnimationLoop";
+import { drawRoute } from "../lib/drawRoute";
+import type { Correction, ExtrapolationBasis, FlightRouteLayerRefs } from "../lib/types";
 
-interface GlobeMapProps {
-  accessToken: string;
+interface FlightRouteLayerProps {
   track: TrackPoint[] | null;
   tailMode: boolean;
   onTailModeInterrupted: () => void;
 }
 
-export default function GlobeMap({
-  accessToken,
+// Draws one flight's route, plane marker, and tail-mode camera behavior onto
+// the shared `<MapView>` — a consumer of the map, not an owner of it.
+export default function FlightRouteLayer({
   track,
   tailMode,
   onTailModeInterrupted,
-}: GlobeMapProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<mapboxgl.Map | null>(null);
+}: FlightRouteLayerProps) {
+  const map = useMap();
   const userInteractedRef = useRef(false);
   const tailModeActiveRef = useRef(false);
   const tailModeEasingRef = useRef(false);
@@ -37,19 +36,18 @@ export default function GlobeMap({
   const correctionRef = useRef<Correction | null>(null);
   const settledPointsRef = useRef<TrackPoint[]>([]);
   const tailModeRef = useRef(tailMode);
-  // Read fresh inside the map event handlers below, which are only bound once.
+  // Read fresh inside the map event handlers below, which are only bound once per map instance.
   const onTailModeInterruptedRef = useRef(onTailModeInterrupted);
   const ensureAnimationLoopRunningRef = useRef<(() => void) | null>(null);
 
-  // The imperative map/animation state, bundled for the extracted
-  // planeAnimationLoop and drawRoute modules — see GlobeMapRefs for why
-  // these need to be shared rather than owned by a single effect. Built
+  // The imperative animation state, bundled for the extracted
+  // planeAnimationLoop and drawRoute modules — see FlightRouteLayerRefs for
+  // why these need to be shared rather than owned by a single effect. Built
   // fresh inside each effect below (rather than once here) so its plain
   // object identity doesn't itself need to be tracked as an effect
   // dependency — every field is a ref, already exempt from that.
-  function currentRefs(): GlobeMapRefs {
+  function currentRefs(): FlightRouteLayerRefs {
     return {
-      mapRef,
       userInteractedRef,
       tailModeActiveRef,
       tailModeEasingRef,
@@ -74,23 +72,7 @@ export default function GlobeMap({
   }, [onTailModeInterrupted]);
 
   useEffect(() => {
-    if (!containerRef.current) return;
-
-    mapboxgl.accessToken = accessToken;
-
-    const map = new mapboxgl.Map({
-      container: containerRef.current,
-      style: "mapbox://styles/mapbox/standard",
-      projection: "globe",
-      zoom: 2.2,
-      center: [0, 20],
-    });
-
-    map.on("style.load", () => {
-      map.setConfigProperty("basemap", "lightPreset", "night");
-    });
-
-    map.addControl(new mapboxgl.NavigationControl(), "top-right");
+    if (!map) return;
 
     // `originalEvent` is only present for user-initiated drags/zooms, not
     // for programmatic camera moves like `fitBounds`/`easeTo`/`setCenter`.
@@ -119,8 +101,6 @@ export default function GlobeMap({
         applyMarkerRotation(map, marker, segment.from, segment.to);
     });
 
-    mapRef.current = map;
-
     const animationLoop = createPlaneAnimationLoop(map, currentRefs());
     ensureAnimationLoopRunningRef.current = animationLoop.ensureRunning;
 
@@ -132,13 +112,10 @@ export default function GlobeMap({
       }
       planeMarkerRef.current?.remove();
       planeMarkerRef.current = null;
-      map.remove();
-      mapRef.current = null;
     };
-  }, [accessToken]);
+  }, [map]);
 
   useEffect(() => {
-    const map = mapRef.current;
     if (!map) return;
 
     const syncRoute = () => drawRoute(map, track, tailMode, currentRefs());
@@ -148,7 +125,7 @@ export default function GlobeMap({
     } else {
       map.once("style.load", syncRoute);
     }
-  }, [track, tailMode]);
+  }, [map, track, tailMode]);
 
-  return <div ref={containerRef} className="h-full w-full" />;
+  return null;
 }

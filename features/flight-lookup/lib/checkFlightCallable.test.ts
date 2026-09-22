@@ -40,7 +40,7 @@ describe("checkFlightCallable", () => {
     });
     vi.stubGlobal("fetch", fetchMock);
 
-    const { checkFlightCallable } = await import("./flight");
+    const { checkFlightCallable } = await import("./checkFlightCallable");
     const result = await checkFlightCallable("BA285");
 
     expect(result.callable).toBe(true);
@@ -72,7 +72,7 @@ describe("checkFlightCallable", () => {
     });
     vi.stubGlobal("fetch", fetchMock);
 
-    const { checkFlightCallable } = await import("./flight");
+    const { checkFlightCallable } = await import("./checkFlightCallable");
     const result = await checkFlightCallable("BA285");
 
     expect(result.callable).toBe(false);
@@ -88,7 +88,7 @@ describe("checkFlightCallable", () => {
     });
     vi.stubGlobal("fetch", fetchMock);
 
-    const { checkFlightCallable } = await import("./flight");
+    const { checkFlightCallable } = await import("./checkFlightCallable");
     const result = await checkFlightCallable("BA285");
 
     expect(result.callable).toBe(false);
@@ -100,7 +100,7 @@ describe("checkFlightCallable", () => {
     delete process.env.FR24_API_TOKEN;
     vi.stubGlobal("fetch", vi.fn());
 
-    const { checkFlightCallable } = await import("./flight");
+    const { checkFlightCallable } = await import("./checkFlightCallable");
 
     await expect(checkFlightCallable("BA285")).rejects.toThrow(
       /FR24 API token is not configured/,
@@ -116,7 +116,7 @@ describe("checkFlightCallable", () => {
     });
     vi.stubGlobal("fetch", fetchMock);
 
-    const { checkFlightCallable } = await import("./flight");
+    const { checkFlightCallable } = await import("./checkFlightCallable");
 
     await expect(checkFlightCallable("BA285")).rejects.toThrow(/402/);
   });
