@@ -1,4 +1,5 @@
 import type { TrackPoint } from "@/features/flight-track/lib/getFlightTrack";
+import { currentTrackPoint } from "@/features/flight-track/lib/currentTrackPoint";
 import {
   destinationPoint,
   haversineDistanceMeters,
@@ -24,7 +25,8 @@ export function estimateCurrentSpeedMetersPerSecond(
   if (track.length < 2) return FALLBACK_SPEED_METERS_PER_SECOND;
 
   const previous = track[track.length - 2];
-  const current = track[track.length - 1];
+  const current = currentTrackPoint(track);
+  if (!current) return FALLBACK_SPEED_METERS_PER_SECOND;
   const elapsedSeconds =
     (new Date(current.timestamp).getTime() -
       new Date(previous.timestamp).getTime()) /

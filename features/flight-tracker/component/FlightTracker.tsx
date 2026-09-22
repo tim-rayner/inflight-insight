@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import MapView from "@/features/map/component/MapView";
 import FlightRouteLayer from "@/features/flight-route/component/FlightRouteLayer";
 import FlightTelemetryPanel from "@/features/flight-telemetry/component/FlightTelemetryPanel";
+import { FlightWrapper, PlaneLocationLog } from "@/features/flight-telemetry/component/FlightWrapper";
 import {
   getCachedFlightTrack,
   getTrackedFlightNumber,
@@ -73,53 +74,54 @@ export default function FlightTracker({ accessToken }: FlightTrackerProps) {
   }
 
   return (
-    <div className="relative h-full w-full">
-      <MapView accessToken={accessToken}>
-        <FlightRouteLayer
-          track={track}
-          tailMode={tailMode}
-          onTailModeInterrupted={() => setTailMode(false)}
-        />
-      </MapView>
-      <form
-        onSubmit={handleSubmit}
-        className="absolute left-4 top-4 z-10 flex flex-col gap-2 rounded-lg bg-black/70 p-3 text-sm text-white shadow-lg backdrop-blur"
-      >
-        <label htmlFor="flight-number" className="font-medium">
-          Flight number
-        </label>
-        <div className="flex gap-2">
-          <input
-            id="flight-number"
-            name="flight-number"
-            type="text"
-            value={flightNumberInput}
-            onChange={(event) => setFlightNumberInput(event.target.value.toUpperCase())}
-            placeholder="BA285"
-            className="w-32 rounded border border-white/30 bg-white/10 px-2 py-1 uppercase outline-none focus:border-white"
+    <FlightWrapper flightNumber={submittedFlightNumber} track={track} record={record}>
+      <div className="relative h-full w-full">
+        <MapView accessToken={accessToken}>
+          <FlightRouteLayer
+            track={track}
+            tailMode={tailMode}
+            onTailModeInterrupted={() => setTailMode(false)}
           />
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="rounded bg-sky-500 px-3 py-1 font-medium disabled:opacity-50"
-          >
-            {isLoading ? "Tracking…" : "Track"}
-          </button>
-        </div>
-        <label className="flex items-center gap-2 text-white/80">
-          <input
-            type="checkbox"
-            checked={tailMode}
-            onChange={(event) => setTailMode(event.target.checked)}
-            className="h-3.5 w-3.5 accent-sky-500"
-          />
-          Tail mode
-        </label>
-        {statusMessage && <p className="max-w-xs text-red-300">{statusMessage}</p>}
-      </form>
-      {track && (
-        <FlightTelemetryPanel flightNumber={submittedFlightNumber} track={track} record={record} />
-      )}
-    </div>
+        </MapView>
+        <form
+          onSubmit={handleSubmit}
+          className="absolute left-4 top-4 z-10 flex flex-col gap-2 rounded-lg bg-black/70 p-3 text-sm text-white shadow-lg backdrop-blur"
+        >
+          <label htmlFor="flight-number" className="font-medium">
+            Flight number
+          </label>
+          <div className="flex gap-2">
+            <input
+              id="flight-number"
+              name="flight-number"
+              type="text"
+              value={flightNumberInput}
+              onChange={(event) => setFlightNumberInput(event.target.value.toUpperCase())}
+              placeholder="BA285"
+              className="w-32 rounded border border-white/30 bg-white/10 px-2 py-1 uppercase outline-none focus:border-white"
+            />
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="rounded bg-sky-500 px-3 py-1 font-medium disabled:opacity-50"
+            >
+              {isLoading ? "Tracking…" : "Track"}
+            </button>
+          </div>
+          <label className="flex items-center gap-2 text-white/80">
+            <input
+              type="checkbox"
+              checked={tailMode}
+              onChange={(event) => setTailMode(event.target.checked)}
+              className="h-3.5 w-3.5 accent-sky-500"
+            />
+            Tail mode
+          </label>
+          {statusMessage && <p className="max-w-xs text-red-300">{statusMessage}</p>}
+        </form>
+        <PlaneLocationLog />
+        {track && <FlightTelemetryPanel />}
+      </div>
+    </FlightWrapper>
   );
 }

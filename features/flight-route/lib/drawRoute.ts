@@ -1,5 +1,6 @@
 import mapboxgl from "mapbox-gl";
 import type { TrackPoint } from "@/features/flight-track/lib/getFlightTrack";
+import { currentTrackPoint } from "@/features/flight-track/lib/currentTrackPoint";
 import { initialBearingDegrees } from "@/features/flight-route/lib/geo";
 import { estimateCurrentSpeedMetersPerSecond, extrapolatePosition } from "@/features/flight-route/lib/planeAnimation";
 import { originGeoJSON, routeLineFeature, type PlanePosition } from "@/features/flight-route/lib/routeRendering";
@@ -53,7 +54,8 @@ export function drawRoute(map: mapboxgl.Map, track: TrackPoint[] | null, tailMod
   // always the live (dead-reckoned or corrected) marker position, drawn
   // every animation frame by the plane animation loop, never here.
   refs.settledPointsRef.current = track;
-  const latest = track[track.length - 1];
+  const latest = currentTrackPoint(track);
+  if (!latest) return;
   const previous: TrackPoint | undefined = track.length >= 2 ? track[track.length - 2] : undefined;
   const latestPosition: PlanePosition = { lon: latest.lon, lat: latest.lat };
   const latestTimestampMs = new Date(latest.timestamp).getTime();

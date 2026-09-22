@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { memo, useEffect, useRef, useState, type ReactNode } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { MapContext } from "../lib/mapContext";
@@ -14,7 +14,7 @@ interface MapViewProps {
 // instance that any feature can draw onto via `useMap()`. Owns only the
 // map's own lifecycle and chrome (projection, night styling, zoom/pan
 // controls); knows nothing about what gets drawn on it.
-export default function MapView({ accessToken, children }: MapViewProps) {
+function MapView({ accessToken, children }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<mapboxgl.Map | null>(null);
 
@@ -52,3 +52,5 @@ export default function MapView({ accessToken, children }: MapViewProps) {
     </MapContext.Provider>
   );
 }
+
+export default memo(MapView);
