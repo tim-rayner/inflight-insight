@@ -50,6 +50,11 @@ export function drawRoute(map: mapboxgl.Map, track: TrackPoint[] | null, tailMod
   // data below, so the camera is left alone and never re-fit or panned.
   const isFirstDraw = !map.getSource(ROUTE_SOURCE_ID);
 
+  if (isFirstDraw) {
+    refs.planeMarkerRef.current?.remove();
+    refs.planeMarkerRef.current = null;
+  }
+
   // Every confirmed point is "settled" — the line's tip beyond it is
   // always the live (dead-reckoned or corrected) marker position, drawn
   // every animation frame by the plane animation loop, never here.

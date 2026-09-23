@@ -120,11 +120,21 @@ export default function FlightRouteLayer({
 
     const syncRoute = () => drawRoute(map, track, tailMode, currentRefs());
 
+    // `map.isStyleLoaded()` (`style.loaded()`) requires every source's tiles
+    // to be loaded too, which for this app's zoomed-out globe view can take
+    // far longer than the style itself — or, with the Standard style's
+    // imports, may never flip true at all. Gate on the one-shot "style.load"
+    // *event* instead (fires as soon as the style/sprite are parsed, well
+    // before tiles finish) rather than re-checking `isStyleLoaded()` inside
+    // the handler, which would silently drop the draw forever.
     if (map.isStyleLoaded()) {
       syncRoute();
     } else {
       map.once("style.load", syncRoute);
     }
+    return () => {
+      map.off("style.load", syncRoute);
+    };
   }, [map, track, tailMode]);
 
   return null;

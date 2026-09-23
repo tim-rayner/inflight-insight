@@ -14,8 +14,9 @@ import {
 import { persistTrackedFlightNumber } from "@/features/flight-tracker/lib/persistTrackedFlightNumber";
 import { resolveFlightRoute, type ResolveFlightRouteResult } from "@/features/flight-tracker/lib/resolveFlightRoute";
 
-const MapView = dynamic(() => import("@/features/map/component/MapView"), { ssr: false });
-const FlightRouteLayer = dynamic(() => import("@/features/flight-route/component/FlightRouteLayer"), { ssr: false });
+const FlightMap = dynamic(() => import("@/features/flight-tracker/component/FlightMap"), {
+  ssr: false,
+});
 
 interface FlightTrackerProps {
   accessToken: string;
@@ -38,6 +39,18 @@ function getServerSnapshot() {
   return "";
 }
 
+function subscribeNever() {
+  return () => {};
+}
+
+function getClientMounted() {
+  return true;
+}
+
+function getServerMounted() {
+  return false;
+}
+
 // Seeds TanStack Query with the last-known track for this flight number so a page
 // refresh renders the cached route immediately, ahead of any network call.
 function initialFallbackResult(flightNumber: string): ResolveFlightRouteResult | undefined {
@@ -52,6 +65,7 @@ export default function FlightTracker({ accessToken, initialFlightNumber = "" }:
   const [submittedOverride, setSubmittedOverride] = useState<string | null>(null);
   const submittedFlightNumber = submittedOverride ?? (persistedFlightNumber || initialFlightNumber);
   const flightNumberInput = draftInput ?? (persistedFlightNumber || initialFlightNumber);
+  const hasMounted = useSyncExternalStore(subscribeNever, getClientMounted, getServerMounted);
   const [tailMode, setTailMode] = useState(false);
 
   const { data: result, isLoading } = useQuery({
@@ -95,13 +109,12 @@ export default function FlightTracker({ accessToken, initialFlightNumber = "" }:
   return (
     <FlightWrapper flightNumber={submittedFlightNumber} track={track} record={record}>
       <div className="relative h-full w-full">
-        <MapView accessToken={accessToken}>
-          <FlightRouteLayer
-            track={track}
-            tailMode={tailMode}
-            onTailModeInterrupted={() => setTailMode(false)}
-          />
-        </MapView>
+        <FlightMap
+          accessToken={accessToken}
+          track={track}
+          tailMode={tailMode}
+          onTailModeInterrupted={() => setTailMode(false)}
+        />
         <form
           onSubmit={handleSubmit}
           className="absolute left-4 top-4 z-10 flex flex-col gap-2 rounded-lg bg-black/70 p-3 text-sm text-white shadow-lg backdrop-blur"
@@ -139,7 +152,7 @@ export default function FlightTracker({ accessToken, initialFlightNumber = "" }:
           {statusMessage && <p className="max-w-xs text-red-300">{statusMessage}</p>}
         </form>
         <PlaneLocationLog />
-        {track && <FlightTelemetryPanel />}
+        {hasMounted && track && <FlightTelemetryPanel />}
       </div>
     </FlightWrapper>
   );

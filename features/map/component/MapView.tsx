@@ -31,7 +31,7 @@ function MapView({ accessToken, children }: MapViewProps) {
       center: [0, 20],
     });
 
-    instance.on("style.load", () => {
+    instance.once("style.load", () => {
       instance.setConfigProperty("basemap", "lightPreset", "night");
     });
 
